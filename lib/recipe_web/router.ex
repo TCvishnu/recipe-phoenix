@@ -37,7 +37,10 @@ defmodule RecipeWeb.Router do
     pipe_through [:api, :auth]
 
     get "/verify-token", AuthController, :verify
-    resources "/recipes", RecipeController
+    resources "/recipes", RecipeController do
+      resources "/comments", CommentsController
+    end
+
   end
 
   # Other scopes may use custom stacks.

@@ -22,7 +22,7 @@ defmodule RecipeWeb.RecipeController do
         |> json(%{error: "Recipe not found"})
       recipe ->
         conn
-        |> json(recipe: recipe)
+        |> json(%{recipe: recipe})
     end
   end
 

@@ -4,7 +4,7 @@ defmodule Recipe.Recipe do
 
   schema "recipes" do
     field :name, :string
-    field :ingredients, {:array, :string}
+    field :ingredients, {:array, :map}
     field :steps, {:array, :string}
     field :images, {:array, :string}
     field :is_veg, :boolean, default: false
