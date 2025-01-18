@@ -14,7 +14,7 @@ defmodule Recipe.Comment do
   @doc false
   def changeset(comment, attrs) do
     comment
-    |> cast(attrs, [:text])
+    |> cast(attrs, [:text, :recipe_id, :user_id, :parent_comment_id])
     |> validate_required([:text, :recipe_id, :user_id])
     |> validate_length(:text, min: 1)
   end
