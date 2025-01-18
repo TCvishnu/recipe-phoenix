@@ -9,8 +9,10 @@ defmodule RecipeWeb.CommentsController do
       {recipe_id, _} ->
         comments =
           Comment
+          |> join(:inner, [c], u in Recipe.Accounts.User, on: u.id == c.user_id)
           |> where([c], c.recipe_id == ^recipe_id)
           |> order_by([c], asc: c.inserted_at)
+          |> select([c, u], %{id: c.id, text: c.text, user_id: c.user_id, user_email: u.email, recipe_id: c.recipe_id, inserted_at: c.inserted_at, parent_comment_id: c.parent_comment_id})
           |> Repo.all()
 
         json(conn, %{comments: comments})
