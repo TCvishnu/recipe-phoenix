@@ -1,20 +1,14 @@
 defmodule RecipeWeb.CommentsController do
   use RecipeWeb, :controller
 
-  alias Recipe.{Repo, Comment}
+  alias Recipe.{Repo, Comment, Reply}
   import Ecto.Query
 
   def index(conn, %{"recipe_id" => recipe_id_in_params}) do
     case Integer.parse(recipe_id_in_params) do
       {recipe_id, _} ->
-        comments =
-          Comment
-          |> join(:inner, [c], u in Recipe.Accounts.User, on: u.id == c.user_id)
-          |> where([c], c.recipe_id == ^recipe_id)
-          |> order_by([c], asc: c.inserted_at)
-          |> select([c, u], %{id: c.id, text: c.text, user_id: c.user_id, user_email: u.email, recipe_id: c.recipe_id, inserted_at: c.inserted_at, parent_comment_id: c.parent_comment_id})
-          |> Repo.all()
-
+        comments = get_comments_by_recipe_id(recipe_id)
+        IO.inspect(comments)
         json(conn, %{comments: comments})
 
       :error ->
@@ -45,36 +39,62 @@ defmodule RecipeWeb.CommentsController do
     end
   end
 
-  def create(conn, %{"comment" => comment_params, "recipe_id" => recipe_id_params}) do
+  def create(conn, %{"comment" => comment_params, "recipe_id" => recipe_id_params, "reply" => reply}) do
     case Integer.parse(recipe_id_params) do
       {recipe_id, _} ->
         user = conn.assigns[:current_user]
-        new_comment_params = Map.put(comment_params, "recipe_id", recipe_id)
-        new_comment_params = Map.put(new_comment_params, "user_id", user.id)
+        comment_params = Map.put(comment_params, "recipe_id", recipe_id)
+        comment_params = Map.put(comment_params, "user_id", user.id)
 
-        IO.inspect(new_comment_params, label: "new_comment_params")
+        reply = String.downcase(reply) == "true"
 
-        changeset = Comment.changeset(%Comment{}, new_comment_params)
+        Repo.transaction(fn ->
+          comment_changeset = Comment.changeset(%Comment{}, comment_params)
 
-        IO.inspect(changeset, label: "Changeset for comment creation")
+          case Repo.insert(comment_changeset) do
+            {:ok, comment} ->
+              if reply do
+                parent_comment_id = comment_params["parent_comment_id"]
+                reply_changeset = Reply.changeset(%Reply{}, %{"main_comment_id" => parent_comment_id, "reply_comment_id" => comment.id})
 
-        case Repo.insert(changeset) do
-          {:ok, comment} ->
-            conn
-            |> put_status(:created)
-            |> json(%{comment: comment})
+                case Repo.insert(reply_changeset) do
+                  {:ok, reply} ->
+                    conn
+                    |> put_status(:created)
+                    |> json(%{comment: comment, reply: reply})
+                  {:error, _reply_changeset_error} ->
+                    Repo.rollback({:failed_insertion})
+                    json(conn, %{error: "Replying error"})
+                end
+              else
+                conn
+                |> put_status(:created)
+                |> json(%{comment: comment})
+              end
 
-          {:error, changeset} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{errors: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)})
-        end
+            {:error, _changeset} ->
+              json(conn, %{error: "Comment insertion failed"})
+          end
+        end)
 
       :error ->
         conn
         |> put_status(:bad_request)
         |> json(%{error: "Invalid recipe id"})
     end
+  end
+
+  defp get_comments_by_recipe_id(recipe_id) do
+    reply_comment_ids_query =
+      from(r in Recipe.Reply,
+        select: r.reply_comment_id
+      )
+
+    Comment
+    |> where([c], c.recipe_id == ^recipe_id)
+    |> where([c], c.id not in subquery(reply_comment_ids_query))
+    |> preload([:user, replies: [:reply, reply: [:user]]])
+    |> Repo.all()
   end
 
 
