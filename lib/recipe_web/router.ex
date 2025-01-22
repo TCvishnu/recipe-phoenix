@@ -41,6 +41,7 @@ defmodule RecipeWeb.Router do
       resources "/comments", CommentsController
     end
 
+    resources "/recent-recipes", RecentRecipeController, only: [:create, :index]
   end
 
   # Other scopes may use custom stacks.

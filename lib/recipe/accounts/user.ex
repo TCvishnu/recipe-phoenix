@@ -10,6 +10,7 @@ defmodule Recipe.Accounts.User do
     field :password_hash, :string
 
     has_many :recipes, Recipe.Recipe
+    has_many :recent_recipes, Recipe.RecentRecipe
 
     timestamps()
   end

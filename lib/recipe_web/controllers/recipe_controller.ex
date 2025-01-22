@@ -5,7 +5,7 @@ defmodule RecipeWeb.RecipeController do
   alias Recipe.Recipe
   import Ecto.Query
 
-  def index(conn, %{"page" => page, "size" => size, "q" => search_term }) do
+  def index(conn, %{"page" => page, "size" => size}) do
     page = String.to_integer(page)
     page_size = String.to_integer(size)
 
@@ -16,10 +16,7 @@ defmodule RecipeWeb.RecipeController do
 
   def index(conn, %{ "q" => search_term}) do
     liketerm = "%#{search_term}%"
-    recipes =
-      Recipe
-      |> where([r], ilike(r.name, ^liketerm))
-      |> Repo.all()
+    recipes = list_recipes_searched((liketerm))
 
     json(conn, %{recipes: recipes})
   end
@@ -85,7 +82,6 @@ defmodule RecipeWeb.RecipeController do
   end
 
   defp list_recipes_paginated(page, page_size) do
-
     Recipe
     |> select([r], %{
       id: r.id,
@@ -95,9 +91,22 @@ defmodule RecipeWeb.RecipeController do
       preparation_time: r.preperation_time,
       steps_count: fragment("array_length(?, 1)", r.steps)
     })
-    |> order_by(desc: :inserted_at)
     |> limit(^page_size)
     |> offset(^((page - 1) * page_size))
+    |> Repo.all()
+  end
+
+  defp list_recipes_searched(liketerm) do
+    Recipe
+    |> select([r], %{
+      id: r.id,
+      name: r.name,
+      rating: r.rating,
+      is_veg: r.is_veg,
+      preparation_time: r.preperation_time,
+      steps_count: fragment("array_length(?, 1)", r.steps)
+    })
+    |> where([r], ilike(r.name, ^liketerm))
     |> Repo.all()
   end
 
