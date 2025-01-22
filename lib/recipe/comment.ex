@@ -26,9 +26,6 @@ defmodule Recipe.Comment do
     %{
       id: comment.id,
       text: comment.text,
-      recipe_id: comment.recipe_id,
-      user_id: comment.user_id,
-      inserted_at: comment.inserted_at,
       updated_at: comment.updated_at,
       replies: encode_replies(comment.replies, opts),
       user: encode_user(comment.user, opts)
@@ -36,14 +33,9 @@ defmodule Recipe.Comment do
     |> Jason.Encode.map(opts)
   end
 
-  # Helper function to encode replies
   defp encode_replies(replies, opts) when is_list(replies) do
     Enum.map(replies, fn reply ->
       %{
-        id: reply.id,
-        reply_comment_id: reply.reply_comment_id,
-        main_comment_id: reply.main_comment_id,
-        inserted_at: reply.inserted_at,
         updated_at: reply.updated_at,
         reply: encode_nested_reply(reply.reply, opts)
       }
@@ -52,7 +44,6 @@ defmodule Recipe.Comment do
 
   defp encode_replies(_replies, _opts), do: nil
 
-  # Helper function to encode nested reply comments
   defp encode_nested_reply(%Recipe.Comment{} = nested_reply, opts) do
     %{
       id: nested_reply.id,
@@ -67,12 +58,9 @@ defmodule Recipe.Comment do
 
   defp encode_nested_reply(nil, _opts), do: nil
 
-  # Helper function to encode the user
-  defp encode_user(%Recipe.Accounts.User{} = user, opts) do
+  defp encode_user(%Recipe.Accounts.User{} = user, _opts) do
     %{
-      id: user.id,
       email: user.email,
-      inserted_at: user.inserted_at,
       updated_at: user.updated_at
     }
   end

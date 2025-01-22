@@ -5,12 +5,27 @@ defmodule RecipeWeb.RecipeController do
   alias Recipe.Recipe
   import Ecto.Query
 
-  def index(conn, %{"page" => page, "size" => size }) do
+  def index(conn, %{"page" => page, "size" => size, "q" => search_term }) do
     page = String.to_integer(page)
     page_size = String.to_integer(size)
 
     recipes = list_recipes_paginated(page, page_size)
 
+    json(conn, %{recipes: recipes})
+  end
+
+  def index(conn, %{ "q" => search_term}) do
+    liketerm = "%#{search_term}%"
+    recipes =
+      Recipe
+      |> where([r], ilike(r.name, ^liketerm))
+      |> Repo.all()
+
+    json(conn, %{recipes: recipes})
+  end
+
+  def index(conn, _params) do
+    recipes = Repo.all(Recipe)
     json(conn, %{recipes: recipes})
   end
 
@@ -70,6 +85,7 @@ defmodule RecipeWeb.RecipeController do
   end
 
   defp list_recipes_paginated(page, page_size) do
+
     Recipe
     |> select([r], %{
       id: r.id,
