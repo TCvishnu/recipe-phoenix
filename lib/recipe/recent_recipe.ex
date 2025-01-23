@@ -30,11 +30,10 @@ defmodule Recipe.RecentRecipe do
     %{
       id: recipe.recipe_id,
       name: recipe.name,
-      steps: recipe.steps,
       is_veg: recipe.is_veg,
       rating: recipe.rating,
       preperation_time: recipe.preperation_time,
-
+      steps_count: length(recipe.steps)
     }
     end
   end

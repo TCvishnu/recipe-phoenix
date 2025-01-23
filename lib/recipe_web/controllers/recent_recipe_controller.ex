@@ -6,7 +6,6 @@ defmodule RecipeWeb.RecentRecipeController do
 
   def index(conn, _params) do
     user = conn.assigns[:current_user]
-    IO.inspect(user)
     recent_recipes =
     RecentRecipe
     |> where([r], r.user_id == ^user.id)
@@ -17,7 +16,6 @@ defmodule RecipeWeb.RecentRecipeController do
     recent_recipes = Enum.map(recent_recipes, fn recent_recipe ->
       %{
         id: recent_recipe.id,
-        recipe_id: recent_recipe.recipe_id,
         recipe: %{
           id: recent_recipe.recipe.id,
           name: recent_recipe.recipe.name,
@@ -36,11 +34,11 @@ defmodule RecipeWeb.RecentRecipeController do
 
     case search_recent_recipe(user.id, recipe_id) do
       nil ->
-        if count_recent_recipes(user.id) == 5 do
-          case find_oldest_recent_recipe(user.id) do
-            recent ->
+        if count_recent_recipes_of_user(user.id) == 5 do
+          case find_oldest_recent_recipe_of_user(user.id) do
+            least_recent ->
               Repo.transaction(fn ->
-                Repo.delete!(recent)
+                Repo.delete!(least_recent)
                 insert_recent_recipe(user.id, recipe_id)
               end)
               |> case do
@@ -73,20 +71,18 @@ defmodule RecipeWeb.RecentRecipeController do
     Repo.insert!(recent_recipe_changeset)
   end
 
-
   defp search_recent_recipe(user_id, recipe_id) do
-    RecentRecipe
-    |> Repo.get_by(user_id: user_id, recipe_id: recipe_id)
+    Repo.get_by(RecentRecipe, user_id: user_id, recipe_id: recipe_id)
   end
 
-  defp count_recent_recipes(user_id) do
+  defp count_recent_recipes_of_user(user_id) do
     RecentRecipe
     |> where([r], r.user_id == ^user_id)
     |> select([r], count(r.id))
     |> Repo.one()
   end
 
-  defp find_oldest_recent_recipe(user_id) do
+  defp find_oldest_recent_recipe_of_user(user_id) do
     RecentRecipe
     |> where([r], r.user_id == ^user_id)
     |> order_by([r], asc: r.updated_at)

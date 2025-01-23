@@ -50,7 +50,6 @@ defmodule RecipeWeb.CommentsController do
 
         Repo.transaction(fn ->
           comment_changeset = Comment.changeset(%Comment{}, comment_params)
-
           case Repo.insert(comment_changeset) do
             {:ok, comment} ->
               if reply do
@@ -67,6 +66,11 @@ defmodule RecipeWeb.CommentsController do
                     json(conn, %{error: "Replying error"})
                 end
               else
+                comment = Comment
+                |> where([c], c.id == ^comment.id)
+                |> preload([:user, replies: [:reply, reply: [:user]]])
+                |> Repo.one()
+
                 conn
                 |> put_status(:created)
                 |> json(%{comment: comment})
