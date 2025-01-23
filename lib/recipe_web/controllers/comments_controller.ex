@@ -58,6 +58,11 @@ defmodule RecipeWeb.CommentsController do
 
                 case Repo.insert(reply_changeset) do
                   {:ok, reply} ->
+                    comment = Comment
+                    |> where([c], c.id == ^comment.id)
+                    |> preload([:user, replies: [:reply, reply: [:user]]])
+                    |> Repo.one()
+
                     conn
                     |> put_status(:created)
                     |> json(%{comment: comment, reply: reply})
@@ -65,6 +70,7 @@ defmodule RecipeWeb.CommentsController do
                     Repo.rollback({:failed_insertion})
                     json(conn, %{error: "Replying error"})
                 end
+                json(conn, %{random: "random"});
               else
                 comment = Comment
                 |> where([c], c.id == ^comment.id)
@@ -75,7 +81,6 @@ defmodule RecipeWeb.CommentsController do
                 |> put_status(:created)
                 |> json(%{comment: comment})
               end
-
             {:error, _changeset} ->
               json(conn, %{error: "Comment insertion failed"})
           end
@@ -86,6 +91,7 @@ defmodule RecipeWeb.CommentsController do
         |> put_status(:bad_request)
         |> json(%{error: "Invalid recipe id"})
     end
+    json(conn, %{random: "random"})
   end
 
   defp get_comments_by_recipe_id(recipe_id) do
