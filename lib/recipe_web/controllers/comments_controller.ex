@@ -94,6 +94,33 @@ defmodule RecipeWeb.CommentsController do
     json(conn, %{random: "random"})
   end
 
+  def delete(conn, %{"id" => id}) do
+    case Repo.get(Comment, id) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{message: "Comment not found"})
+      comment ->
+        user = conn.assigns[:current_user]
+        if(comment.user_id != user.id) do
+          conn
+          |> put_status(:unauthorized)
+          |> json(%{message: "Cannot delete someones else's comment"})
+        end
+        case Repo.delete(comment) do
+          {:ok, _comment} ->
+            conn
+            |> put_status(:no_content)
+            |> json(%{message: "Comment deleted succesfully"})
+          {:error, _changeset} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{message: "Failed to delete comment"})
+        end
+    end
+
+  end
+
   defp get_comments_by_recipe_id(recipe_id) do
     reply_comment_ids_query =
       from(r in Recipe.Reply,
