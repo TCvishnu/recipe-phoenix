@@ -90,6 +90,12 @@ defmodule RecipeWeb.RecipeController do
         |> json(%{error: "Recipe not found"})
 
       recipe ->
+        user = conn.assigns[:current_user]
+        if(recipe.user_id != user.id) do
+          conn
+          |> put_status(:unauthorized)
+          |> json(%{error: "Cannot delete another's user's recipe"})
+        end
         case Repo.delete(recipe) do
           {:ok, _recipe} ->
             conn
