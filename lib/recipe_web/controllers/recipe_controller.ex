@@ -8,7 +8,6 @@ defmodule RecipeWeb.RecipeController do
   def index(conn, %{"page" => page, "size" => size}) do
     page = String.to_integer(page)
     page_size = String.to_integer(size)
-
     recipes = list_recipes_paginated(page, page_size)
 
     json(conn, %{recipes: recipes})
@@ -22,7 +21,10 @@ defmodule RecipeWeb.RecipeController do
   end
 
   def index(conn, _params) do
-    recipes = Repo.all(Recipe)
+    user = conn.assigns[:current_user]
+    recipes = Recipe
+      |> where([r], r.user_id == ^user.id)
+      |> Repo.all()
     json(conn, %{recipes: recipes})
   end
 
@@ -39,6 +41,9 @@ defmodule RecipeWeb.RecipeController do
   end
 
   def create(conn, %{"recipe" => recipe_params}) do
+    user = conn.assigns[:current_user]
+    recipe_params = Map.put(recipe_params, "user_id", user.id)
+    recipe_params = Map.put(recipe_params, "rating", 0)
     case Repo.insert(Recipe.changeset(%Recipe{}, recipe_params)) do
       {:ok, recipe} ->
         conn

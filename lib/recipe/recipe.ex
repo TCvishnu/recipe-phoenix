@@ -21,7 +21,7 @@ defmodule Recipe.Recipe do
   def changeset(recipe, attrs) do
     recipe
     |> cast(attrs, [:name, :ingredients, :steps, :images, :is_veg, :tags, :rating, :preperation_time, :user_id])
-    |> validate_required([:name, :ingredients, :steps, :images, :is_veg, :tags, :rating, :preperation_time, :user_id])
+    |> validate_required([:name, :ingredients, :steps, :is_veg, :tags, :rating, :preperation_time, :user_id])
   end
 
   defimpl Jason.Encoder, for: Recipe.Recipe do
