@@ -23,8 +23,16 @@ defmodule RecipeWeb.RecipeController do
   def index(conn, _params) do
     user = conn.assigns[:current_user]
     recipes = Recipe
-      |> where([r], r.user_id == ^user.id)
-      |> Repo.all()
+    |> select([r], %{
+      id: r.id,
+      name: r.name,
+      rating: r.rating,
+      is_veg: r.is_veg,
+      preparation_time: r.preperation_time,
+      steps_count: fragment("array_length(?, 1)", r.steps)
+    })
+    |> where([r], r.user_id == ^user.id)
+    |> Repo.all()
     json(conn, %{recipes: recipes})
   end
 
@@ -80,9 +88,19 @@ defmodule RecipeWeb.RecipeController do
         conn
         |> put_status(:not_found)
         |> json(%{error: "Recipe not found"})
+
       recipe ->
-        Repo.delete!(recipe)
-        send_resp(conn, :no_content, "")
+        case Repo.delete(recipe) do
+          {:ok, _recipe} ->
+            conn
+            |> put_status(:no_content)
+            |> json(%{message: "Deleted successfully"})
+
+          {:error, _changeset} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{error: "Failed to delete recipe"})
+        end
     end
   end
 
