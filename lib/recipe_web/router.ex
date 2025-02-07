@@ -30,6 +30,7 @@ defmodule RecipeWeb.Router do
     post "/register", AuthController, :register
     post "/login", AuthController, :login
     post "/logout", AuthController, :logout
+    post "/forgot-password", AuthController, :forgot_password
 
   end
 

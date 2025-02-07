@@ -60,7 +60,9 @@ defmodule Recipe.MixProject do
       {:bandit, "~> 1.5"},
       {:jose, "~> 1.11"},
       {:bcrypt_elixir, "~> 3.0"},
-      {:cors_plug, "~> 3.0"}
+      {:cors_plug, "~> 3.0"},
+      {:dotenv, "~> 3.0"},
+      {:timex, "~> 3.7"}
     ]
   end
 

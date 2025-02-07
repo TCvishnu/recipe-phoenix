@@ -29,7 +29,14 @@ config :recipe, RecipeWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :recipe, Recipe.Mailer, adapter: Swoosh.Adapters.Local
+config :recipe, Recipe.Mailer,
+  adapter: Swoosh.Adapters.Local,
+  relay: "smtp.gmail.com",
+  username: System.get_env("MY_EMAIL")
+  password: System.get_env("SMTP_PASSWORD"),
+  port: 587,
+  ssl: false,
+  tls: :if_available
 
 # Configure esbuild (the version is required)
 config :esbuild,

@@ -3,6 +3,7 @@ defmodule RecipeWeb.AuthController do
   alias Recipe.Accounts
 
 
+
   def register(conn, %{"email" => email, "password" => password}) do
     case Accounts.create_user(%{email: email, password: password}) do
       {:ok, user} ->
@@ -45,6 +46,37 @@ defmodule RecipeWeb.AuthController do
         Recipe.Token.revoke(token)
         conn
         |> json(%{message: "Logout successful"})
+    end
+  end
+
+  def forgot_password(conn, %{"email" => email}) do
+    case Accounts.get_user_by_email(email) do
+      {:ok, user} ->
+        token = Recipe.Token.sign(user.id)
+        expires_at = Timex.now() |> Timex.add(Timex.Duration.from_minutes(15))
+
+        changeset = Accounts.User.changeset(user, %{
+          reset_token: token,
+          reset_token_expires_in: expires_at
+        })
+        IO.inspect(changeset)
+
+        case Recipe.Repo.update(changeset) do
+          {:ok, _updated_user} ->
+            Recipe.Emails.forgot_password_email(user, token)
+            conn
+            |> put_status(:reset_content)
+            |> json(%{message: "Reset password mail sent"})
+          {:error, error_changeset} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{message: "Failed to set reset token", error: format_changeset_errors(error_changeset)})
+        end
+
+      {:error, reason} ->
+        conn
+        |> put_status(reason)
+        |> json(%{message: "Invalid mail id"})
     end
   end
 
