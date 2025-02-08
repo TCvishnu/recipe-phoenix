@@ -32,7 +32,7 @@ config :recipe, RecipeWeb.Endpoint,
 config :recipe, Recipe.Mailer,
   adapter: Swoosh.Adapters.Local,
   relay: "smtp.gmail.com",
-  username: System.get_env("MY_EMAIL")
+  username: System.get_env("MY_EMAIL"),
   password: System.get_env("SMTP_PASSWORD"),
   port: 587,
   ssl: false,
