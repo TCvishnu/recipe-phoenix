@@ -10,6 +10,7 @@ defmodule Recipe.Recipe do
     field :is_veg, :boolean, default: false
     field :tags, {:array, :string}
     field :rating, :float
+    field :total_ratings, :integer
     field :preperation_time, :integer
 
     belongs_to :user, Recipe.Accounts.User
@@ -20,7 +21,7 @@ defmodule Recipe.Recipe do
   @doc false
   def changeset(recipe, attrs) do
     recipe
-    |> cast(attrs, [:name, :ingredients, :steps, :images, :is_veg, :tags, :rating, :preperation_time, :user_id])
+    |> cast(attrs, [:name, :ingredients, :steps, :images, :is_veg, :tags, :rating, :preperation_time, :user_id, :total_ratings])
     |> validate_required([:name, :ingredients, :steps, :is_veg, :tags, :rating, :preperation_time, :user_id])
   end
 

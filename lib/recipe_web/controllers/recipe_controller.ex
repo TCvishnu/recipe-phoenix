@@ -52,6 +52,8 @@ defmodule RecipeWeb.RecipeController do
     user = conn.assigns[:current_user]
     recipe_params = Map.put(recipe_params, "user_id", user.id)
     recipe_params = Map.put(recipe_params, "rating", 0)
+    recipe_params = Map.put(recipe_params, "total_ratings", 0)
+
     case Repo.insert(Recipe.changeset(%Recipe{}, recipe_params)) do
       {:ok, recipe} ->
         conn

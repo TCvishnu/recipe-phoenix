@@ -40,7 +40,8 @@ defmodule RecipeWeb.Router do
     get "/verify-token", AuthController, :verify
     resources "/recipes", RecipeController do
       resources "/comments", CommentsController
-      resources "/ratings", RatingsController
+      resources "/ratings", RatingsController, only: [:index, :create]
+      get "/ratings/has-rated", RatingsController, :has_rated?
     end
 
     resources "/recent-recipes", RecentRecipeController, only: [:create, :index]
