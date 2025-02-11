@@ -20,6 +20,28 @@ defmodule RecipeWeb.RecipeController do
     json(conn, %{recipes: recipes})
   end
 
+  def index(conn, %{"tags" => tags}) do
+    case Jason.decode(tags) do
+      {:ok, parsed_tags} ->
+        case Recipe
+        |> where([r], fragment("? && ?", r.tags, ^parsed_tags))
+        |> Repo.all() do
+          nil ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{error: "No recipes found"})
+          recipes ->
+            conn
+            |> put_status(:ok)
+            |> json(%{recipes: recipes})
+        end
+      {:error, _} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: "invalid tags search format"})
+      end
+  end
+
   def index(conn, _params) do
     user = conn.assigns[:current_user]
     recipes = Recipe

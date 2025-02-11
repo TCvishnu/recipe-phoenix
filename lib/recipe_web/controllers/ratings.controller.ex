@@ -73,10 +73,4 @@ defmodule RecipeWeb.RatingsController do
         |> json(%{has_rated: true})
     end
   end
-
-  defp format_changeset_errors(changeset) do
-    Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} ->
-      msg
-    end)
-  end
 end
