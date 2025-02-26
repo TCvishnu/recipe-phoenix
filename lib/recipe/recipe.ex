@@ -9,8 +9,8 @@ defmodule Recipe.Recipe do
     field :images, {:array, :string}
     field :is_veg, :boolean, default: false
     field :tags, {:array, :string}
-    field :rating, :float
-    field :total_ratings, :integer
+    field :rating, :float, default: 0.0
+    field :total_ratings, :integer, default: 0
     field :preperation_time, :integer
 
     belongs_to :user, Recipe.Accounts.User
