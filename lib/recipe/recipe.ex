@@ -6,9 +6,9 @@ defmodule Recipe.Recipe do
     field :name, :string
     field :ingredients, {:array, :map}
     field :steps, {:array, :string}
-    field :images, {:array, :string}
+    field :image, :string
     field :is_veg, :boolean, default: false
-    field :tags, {:array, :string}
+    field :tags, {:array, :string}, default: []
     field :rating, :float, default: 0.0
     field :total_ratings, :integer, default: 0
     field :preperation_time, :integer
@@ -21,8 +21,8 @@ defmodule Recipe.Recipe do
   @doc false
   def changeset(recipe, attrs) do
     recipe
-    |> cast(attrs, [:name, :ingredients, :steps, :images, :is_veg, :tags, :rating, :preperation_time, :user_id, :total_ratings])
-    |> validate_required([:name, :ingredients, :steps, :is_veg, :tags, :rating, :preperation_time, :user_id])
+    |> cast(attrs, [:name, :ingredients, :steps, :image, :is_veg, :tags, :rating, :preperation_time, :user_id, :total_ratings])
+    |> validate_required([:name, :ingredients, :steps, :is_veg, :preperation_time, :user_id])
   end
 
   defimpl Jason.Encoder, for: Recipe.Recipe do
@@ -32,7 +32,7 @@ defmodule Recipe.Recipe do
         name: recipe.name,
         ingredients: recipe.ingredients,
         steps: recipe.steps,
-        images: recipe.images,
+        image: recipe.image,
         is_veg: recipe.is_veg,
         tags: recipe.tags,
         rating: recipe.rating,

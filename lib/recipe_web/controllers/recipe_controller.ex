@@ -63,6 +63,62 @@ defmodule RecipeWeb.RecipeController do
     end
   end
 
+
+  def create(conn, %{
+    "image" => %Plug.Upload{filename: filename, path: temp_path},
+    "name" => name,
+    "ingredients" => ingredients,
+    "steps" => steps,
+    "is_veg" => is_veg,
+    "tags" => tags,
+    "preperation_time" => preperation_time
+  }) do
+
+    ingredients = Jason.decode!(ingredients)
+    steps = Jason.decode!(steps)
+    tags = Jason.decode!(tags)
+
+    upload_dir = Path.join(:code.priv_dir(:recipe), "static/uploads")
+    File.mkdir_p!(upload_dir)
+
+    unique_filename = "#{System.unique_integer([:positive])}_#{filename}"
+    destination_path = Path.join(upload_dir, unique_filename)
+
+    case File.cp(temp_path, destination_path) do
+      :ok ->
+        image_url = "/uploads/#{unique_filename}"
+
+        recipe_params = %{
+          name: name,
+          ingredients: ingredients,
+          steps: steps,
+          is_veg: is_veg,
+          tags: tags,
+          preperation_time: preperation_time,
+          image: image_url,
+          user_id: conn.assigns.current_user.id
+        }
+
+        case RecipeServices.insert_one_recipe(recipe_params) do
+          {:ok, recipe} ->
+            conn
+            |> put_status(:created)
+            |> json(%{recipe: recipe})
+
+          {:error, changeset} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)})
+        end
+
+      {:error, reason} ->
+        conn
+        |> put_status(:internal_server_error)
+        |> json(%{error: "Failed to save image: #{reason}"})
+    end
+  end
+
+
   def update(conn, %{"id" => id, "recipe" => recipe_params}) do
     case RecipeServices.fetch_recipe_by_id(id) do
       nil ->
