@@ -16,7 +16,6 @@ defmodule Recipe.Token do
   @spec verify(String.t()) :: {:ok, any()} | {:error, :unauthenticated}
   def verify(token) do
     case Phoenix.Token.verify(RecipeWeb.Endpoint, @signing_salt, token, max_age: @token_age_secs) do
-
       {:ok, data} -> {:ok, data}
       _error -> {:error, :unauthenticated}
     end

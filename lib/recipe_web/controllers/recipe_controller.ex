@@ -12,7 +12,7 @@ defmodule RecipeWeb.RecipeController do
     json(conn, %{recipes: recipes})
   end
 
-  def index(conn, %{ "q" => search_term}) do
+  def index(conn, %{"q" => search_term}) do
     liketerm = "%#{search_term}%"
     recipes = RecipeServices.search_recipes(liketerm)
     json(conn, %{recipes: recipes})
@@ -24,10 +24,11 @@ defmodule RecipeWeb.RecipeController do
         conn
         |> put_status(:unprocessable_entity)
         |> json(%{error: "No recipes found"})
+
       recipes ->
         conn
-          |> put_status(:ok)
-          |> json(%{recipes: recipes})
+        |> put_status(:ok)
+        |> json(%{recipes: recipes})
     end
   end
 
@@ -42,6 +43,7 @@ defmodule RecipeWeb.RecipeController do
         conn
         |> put_status(:not_found)
         |> json(%{error: "Recipe not found"})
+
       recipe ->
         conn
         |> json(%{recipe: recipe})
@@ -56,6 +58,7 @@ defmodule RecipeWeb.RecipeController do
         conn
         |> put_status(:created)
         |> json(%{recipe: recipe})
+
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
@@ -63,17 +66,15 @@ defmodule RecipeWeb.RecipeController do
     end
   end
 
-
   def create(conn, %{
-    "image" => %Plug.Upload{filename: filename, path: temp_path},
-    "name" => name,
-    "ingredients" => ingredients,
-    "steps" => steps,
-    "is_veg" => is_veg,
-    "tags" => tags,
-    "preperation_time" => preperation_time
-  }) do
-
+        "image" => %Plug.Upload{filename: filename, path: temp_path},
+        "name" => name,
+        "ingredients" => ingredients,
+        "steps" => steps,
+        "is_veg" => is_veg,
+        "tags" => tags,
+        "preperation_time" => preperation_time
+      }) do
     ingredients = Jason.decode!(ingredients)
     steps = Jason.decode!(steps)
     tags = Jason.decode!(tags)
@@ -108,7 +109,9 @@ defmodule RecipeWeb.RecipeController do
           {:error, changeset} ->
             conn
             |> put_status(:unprocessable_entity)
-            |> json(%{error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)})
+            |> json(%{
+              error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
+            })
         end
 
       {:error, reason} ->
@@ -118,15 +121,15 @@ defmodule RecipeWeb.RecipeController do
     end
   end
 
-
   def update(conn, %{"id" => id, "recipe" => recipe_params}) do
     case RecipeServices.fetch_recipe_by_id(id) do
       nil ->
         conn
         |> put_status(:not_found)
         |> json(%{error: "Recipe not found"})
+
       recipe ->
-        if (!Authorizer.can?(conn, recipe)) do
+        if !Authorizer.can?(conn, recipe) do
           conn
           |> put_status(:forbidden)
           |> json(%{error: "Cannot Update another user recipe"})
@@ -135,10 +138,13 @@ defmodule RecipeWeb.RecipeController do
         case RecipeServices.update_recipe(recipe, recipe_params) do
           {:ok, updated_recipe} ->
             json(conn, recipe: updated_recipe)
+
           {:error, changeset} ->
             conn
             |> put_status(:unprocessable_entity)
-            |> json(%{error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)})
+            |> json(%{
+              error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
+            })
         end
     end
   end
@@ -151,7 +157,7 @@ defmodule RecipeWeb.RecipeController do
         |> json(%{error: "Recipe not found"})
 
       recipe ->
-        if (!Authorizer.can?(conn, recipe)) do
+        if !Authorizer.can?(conn, recipe) do
           conn
           |> put_status(:forbidden)
           |> json(%{error: "Cannot Delete another user recipe"})
@@ -168,7 +174,6 @@ defmodule RecipeWeb.RecipeController do
             |> put_status(:unprocessable_entity)
             |> json(%{error: "Failed to delete recipe"})
         end
-
     end
   end
 end

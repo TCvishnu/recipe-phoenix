@@ -5,7 +5,9 @@ defmodule Recipe.Accounts do
 
   def authenticate_user(email, password) do
     case Repo.get_by(User, email: email) do
-      nil -> {:error, :user_not_found}
+      nil ->
+        {:error, :user_not_found}
+
       user ->
         if Bcrypt.verify_pass(password, user.password_hash) do
           {:ok, user}

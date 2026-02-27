@@ -9,11 +9,14 @@ defmodule Recipe.Emails do
          |> to(user.email)
          |> from(from)
          |> subject("Reset Your Password")
-         |> text_body("Click here to reset your password: #{frontend_url}/reset-password?token=#{token}")
+         |> text_body(
+           "Click here to reset your password: #{frontend_url}/reset-password?token=#{token}"
+         )
          |> Recipe.Mailer.deliver() do
       {:ok, response} ->
         IO.inspect(response, label: "Email Sent Successfully")
         :ok
+
       {:error, reason} ->
         IO.inspect(reason, label: "Email Sending Error")
         {:error, reason}

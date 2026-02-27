@@ -6,26 +6,29 @@ defmodule RecipeWeb.RecentRecipeController do
 
   def index(conn, _params) do
     user = conn.assigns[:current_user]
-    recent_recipes =
-    RecentRecipe
-    |> where([r], r.user_id == ^user.id)
-    |> order_by([r], desc: r.updated_at)
-    |> preload(:recipe)
-    |> Repo.all()
 
-    recent_recipes = Enum.map(recent_recipes, fn recent_recipe ->
-      %{
-        id: recent_recipe.id,
-        recipe: %{
-          id: recent_recipe.recipe.id,
-          name: recent_recipe.recipe.name,
-          is_veg: recent_recipe.recipe.is_veg,
-          preparation_time: recent_recipe.recipe.preperation_time,
-          rating: recent_recipe.recipe.rating,
-          steps_count: length(recent_recipe.recipe.steps)
+    recent_recipes =
+      RecentRecipe
+      |> where([r], r.user_id == ^user.id)
+      |> order_by([r], desc: r.updated_at)
+      |> preload(:recipe)
+      |> Repo.all()
+
+    recent_recipes =
+      Enum.map(recent_recipes, fn recent_recipe ->
+        %{
+          id: recent_recipe.id,
+          recipe: %{
+            id: recent_recipe.recipe.id,
+            name: recent_recipe.recipe.name,
+            is_veg: recent_recipe.recipe.is_veg,
+            preparation_time: recent_recipe.recipe.preperation_time,
+            rating: recent_recipe.recipe.rating,
+            steps_count: length(recent_recipe.recipe.steps)
+          }
         }
-      }
-    end)
+      end)
+
     json(conn, %{"recentRecipes" => recent_recipes})
   end
 
@@ -46,6 +49,7 @@ defmodule RecipeWeb.RecentRecipeController do
                   conn
                   |> put_status(:created)
                   |> json(%{message: "Recent recipe added successfully"})
+
                 {:error, reason} ->
                   conn
                   |> put_status(:unprocessable_entity)
@@ -54,6 +58,7 @@ defmodule RecipeWeb.RecentRecipeController do
           end
         else
           insert_recent_recipe(user.id, recipe_id)
+
           conn
           |> put_status(:created)
           |> json(%{message: "Recent recipe added successfully"})
@@ -61,13 +66,16 @@ defmodule RecipeWeb.RecentRecipeController do
 
       recent_recipe ->
         update_updated_at(recent_recipe)
+
         conn
         |> json(%{message: "Recent recipe updated"})
     end
   end
 
   defp insert_recent_recipe(user_id, recipe_id) do
-    recent_recipe_changeset = RecentRecipe.changeset(%RecentRecipe{}, %{user_id: user_id, recipe_id: recipe_id})
+    recent_recipe_changeset =
+      RecentRecipe.changeset(%RecentRecipe{}, %{user_id: user_id, recipe_id: recipe_id})
+
     Repo.insert!(recent_recipe_changeset)
   end
 
@@ -96,5 +104,4 @@ defmodule RecipeWeb.RecentRecipeController do
     changeset = Ecto.Changeset.change(recent_recipe, updated_at: date_time)
     Repo.update(changeset)
   end
-
 end

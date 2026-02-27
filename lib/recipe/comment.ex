@@ -64,5 +64,4 @@ defmodule Recipe.Comment do
 
     defp encode_user(nil, _opts), do: nil
   end
-
 end

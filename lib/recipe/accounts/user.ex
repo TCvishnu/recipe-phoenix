@@ -3,7 +3,6 @@ defmodule Recipe.Accounts.User do
   import Ecto.Changeset
   import Ecto.Query, warn: false
 
-
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true

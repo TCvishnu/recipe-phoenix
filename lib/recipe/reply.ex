@@ -3,7 +3,6 @@ defmodule Recipe.Reply do
   import Ecto.Changeset
 
   schema "replies" do
-
     belongs_to :reply, Recipe.Comment, foreign_key: :reply_comment_id
     belongs_to :comment, Recipe.Comment, foreign_key: :main_comment_id
 

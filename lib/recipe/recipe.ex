@@ -21,7 +21,18 @@ defmodule Recipe.Recipe do
   @doc false
   def changeset(recipe, attrs) do
     recipe
-    |> cast(attrs, [:name, :ingredients, :steps, :image, :is_veg, :tags, :rating, :preperation_time, :user_id, :total_ratings])
+    |> cast(attrs, [
+      :name,
+      :ingredients,
+      :steps,
+      :image,
+      :is_veg,
+      :tags,
+      :rating,
+      :preperation_time,
+      :user_id,
+      :total_ratings
+    ])
     |> validate_required([:name, :ingredients, :steps, :is_veg, :preperation_time, :user_id])
   end
 
@@ -44,5 +55,4 @@ defmodule Recipe.Recipe do
       |> Jason.Encode.map(opts)
     end
   end
-
 end

@@ -3,7 +3,6 @@ defmodule Recipe.RecentRecipe do
   import Ecto.Changeset
 
   schema "recent_recipes" do
-
     belongs_to :user, Recipe.Accounts.User
     belongs_to :recipe, Recipe.Recipe
 
@@ -23,18 +22,18 @@ defmodule Recipe.RecentRecipe do
         id: recent_recipe.id,
         recipe: encode_recipe(recent_recipe.recipe, opts)
       }
-      |>Jason.Encode.map(opts)
+      |> Jason.Encode.map(opts)
     end
 
     defp encode_recipe(recipe, _opts) do
-    %{
-      id: recipe.recipe_id,
-      name: recipe.name,
-      is_veg: recipe.is_veg,
-      rating: recipe.rating,
-      preperation_time: recipe.preperation_time,
-      steps_count: length(recipe.steps)
-    }
+      %{
+        id: recipe.recipe_id,
+        name: recipe.name,
+        is_veg: recipe.is_veg,
+        rating: recipe.rating,
+        preperation_time: recipe.preperation_time,
+        steps_count: length(recipe.steps)
+      }
     end
   end
 end

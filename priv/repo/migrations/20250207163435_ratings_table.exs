@@ -12,5 +12,4 @@ defmodule Recipe.Repo.Migrations.RatingsTable do
 
     create unique_index(:ratings, [:user_id, :recipe_id])
   end
-
 end

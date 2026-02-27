@@ -19,18 +19,19 @@ defmodule RecipeServices do
   end
 
   def list_all_user_recipes(user_id) do
-    recipes = Recipe
-    |> select([r], %{
-      id: r.id,
-      name: r.name,
-      rating: r.rating,
-      is_veg: r.is_veg,
-      preparation_time: r.preperation_time,
-      image: r.image,
-      steps_count: fragment("array_length(?, 1)", r.steps)
-    })
-    |> where([r], r.user_id == ^user_id)
-    |> Repo.all()
+    recipes =
+      Recipe
+      |> select([r], %{
+        id: r.id,
+        name: r.name,
+        rating: r.rating,
+        is_veg: r.is_veg,
+        preparation_time: r.preperation_time,
+        image: r.image,
+        steps_count: fragment("array_length(?, 1)", r.steps)
+      })
+      |> where([r], r.user_id == ^user_id)
+      |> Repo.all()
 
     recipes
   end

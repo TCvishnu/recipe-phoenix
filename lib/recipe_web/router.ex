@@ -22,7 +22,6 @@ defmodule RecipeWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-
   end
 
   scope "/api", RecipeWeb do
@@ -31,13 +30,13 @@ defmodule RecipeWeb.Router do
     post "/login", AuthController, :login
     post "/logout", AuthController, :logout
     post "/forgot-password", AuthController, :forgot_password
-
   end
 
   scope "/api", RecipeWeb do
     pipe_through [:api, :auth]
 
     get "/verify-token", AuthController, :verify
+
     resources "/recipes", RecipeController do
       resources "/comments", CommentsController
       resources "/ratings", RatingsController, only: [:index, :create]
